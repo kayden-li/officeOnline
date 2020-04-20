@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.GraduationDesign.dao.DocDao">
+
+    <!-- 上传 -->
+    <insert id="upload" parameterType="upload">
+      INSERT INTO gd_doc
+      (name,createTime,updateTime)
+      VALUES (#{excelName},now(),now());
+    </insert>
+
+    <!--查找文档编号-->
+    <select id="searchIdByName" parameterType="String" resultType="Integer">
+        select id from gd_doc where name=#{name}
+    </select>
+
+    <!-- 更新更新数据 -->
+    <insert id="in_update" parameterType="update">
+      INSERT INTO gd_update
+      (doc,user,sheet,position,text,updateTime)
+      VALUES (#{doc},#{user},#{sheet},#{position},#{text},now());
+    </insert>
+
+    <!--查找文档编号-->
+    <select id="getNewUpdate" resultType="update">
+        select * from gd_update where doc=#{0} and user=#{1}
+    </select>
+
+<!--  <insert id="addOneUser" parameterType="user">
+    INSERT INTO neuedu_user
+    (username,password,email,create_time,update_time)
+    VALUES (#{userName},#{passWord},#{email},now(),now())
+  </insert>
+  <select id="checkNameOrEmailIsExist" parameterType="user" resultType="user">
+    SELECT *
+    FROM neuedu_user
+    <where>
+        <if test="userName != null">
+            and username =#{userName}
+        </if>
+        <if test="email != null">
+            and email =#{email}
+        </if>
+    </where>
+  </select>-->
+</mapper>

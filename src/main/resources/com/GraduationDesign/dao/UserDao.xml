@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.GraduationDesign.dao.UserDao">
+
+    <!-- 根据用户名和密码查询用户 -->
+    <select id="login" resultType="user" parameterType="user">
+      SELECT * FROM gd_user WHERE username = #{userName} AND password = #{passWord}
+    </select>
+
+    <!-- 注册 -->
+    <insert id="register" parameterType="user">
+      INSERT INTO gd_user
+      (userName,passWord,email,createTime)
+      VALUES (#{userName},#{passWord},#{email},now())
+    </insert>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="findOneUserByName" resultType="user" parameterType="String">
+      SELECT * FROM gd_user WHERE username = #{name} limit 1
+    </select>
+
+    <!-- 根据邮箱查询用户 -->
+    <select id="findOneUserByEmail" resultType="user" parameterType="String">
+      SELECT * FROM gd_user WHERE email = #{email} limit 1
+    </select>
+
+
+<!--  <insert id="addOneUser" parameterType="user">
+    INSERT INTO neuedu_user
+    (username,password,email,create_time,update_time)
+    VALUES (#{userName},#{passWord},#{email},now(),now())
+  </insert>
+  <select id="checkNameOrEmailIsExist" parameterType="user" resultType="user">
+    SELECT *
+    FROM neuedu_user
+    <where>
+        <if test="userName != null">
+            and username =#{userName}
+        </if>
+        <if test="email != null">
+            and email =#{email}
+        </if>
+    </where>
+  </select>-->
+</mapper>
