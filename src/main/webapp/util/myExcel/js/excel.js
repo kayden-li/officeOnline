@@ -7,6 +7,8 @@
         let lastTd = {'pos':null,'text':null}
         //本次修改的内容及位置
         let thisTd = {'pos':null,'text':null}
+        //保存table用于显示消息
+        let table_T = null
         $.fn.extend({
             Excel: function (options) {
                 var op = $.extend({}, options);
@@ -1413,24 +1415,52 @@
 
         //上传更改的内容
         function update(Td) {
+            if(verifyData(Td.pos)) {
+                socket.send(Td.pos+","+Td.text)
+            }else{
+                setMessageInnerHTML("消息位置发生错误")
+            }
             //清空暂存的内容
             if(thisTd.text == "") {
                 thisTd.text = null
                 lastTd.text = null
             }
         }
+        /*监听消息*/
+        socket.onmessage = function (ev) {
+            setMessageInnerHTML(ev.data)
+            displayData(ev.data)
+            //socket.close();
+        }
         //绑定初始数据
         function bindData(t){
+            //保存table
+            table_T = t;
 
-            //设置A1内容为test
-            let test = t.find("tr:eq(1) td:eq(1)")
-            test.html("test")
+            var loc = location.href;
+            var n1 = loc.length;
+            var n2 = loc.indexOf('=');
+            var data = decodeURI(loc.substr(n2+1,n1-n2));
+
+            var dataList = data.split(';')
+            dataList.pop(dataList.length - 1)
+
+            for(let i in dataList){
+                let item = dataList[i].split(',')
+                if(verifyData(item[1])){
+                    let row = item[1].charAt(1)
+                    let col = stringToNum(item[1].charAt(0))
+                    if(item[0] != 'sas'){
+                        let test = t.find("tr:eq("+row+") td:eq("+col+")")
+                        test.html(item[2])
+                    }
+                }
+            }
         }
 
         //将字母转换为数字
         function stringToNum(a){
             var str=a.toLowerCase().split("");
-            var num=0;
             var al = str.length;
             var getCharNumber = function(charx){
                 return charx.charCodeAt() -96;
@@ -1442,6 +1472,27 @@
                 numout += charnum * Math.pow(26, al-i-1);
             };
             return numout;
+        }
+
+        function verifyData(pos) {
+            let verify_code = /^[A-Z]*[0-9]*/
+            return verify_code.test(pos)
+        }
+
+        function displayData(data){
+            let datas = data.split(',')
+            if(datas.length < 3){
+                return
+            }
+            console.log(datas)
+            if(verifyData(datas[1])){
+                let row = datas[1].charAt(1)
+                let col = stringToNum(datas[1].charAt(0))
+                if(datas[0] != 'sas'){
+                    let test = table_T.find("tr:eq("+row+") td:eq("+col+")")
+                    test.html(datas[2])
+                }
+            }
         }
 
     }

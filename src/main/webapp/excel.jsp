@@ -16,14 +16,14 @@
             );
         });
 
-        function getHtml(){
+        /*function getHtml(){
             var t=$(".excel").getExcelHtml();
             $('#getHtml').val(t);
         }
 
         function setHtml() {
             $(".excel").setExcelHtml($('#getHtml').val());
-        }
+        }*/
     </script>
 </head>
 <body>
@@ -126,7 +126,7 @@
                     <li class="borderLeft"><i class="tag btn-borderLeft"></i></li>
                     <li class="borderAll"><i class="tag btn-borderAll"></i></li>
                     <li class="whiteSpace"><i class="tag wrap"></i></li>
-                    <li class="borderColor"><i class="tag borderColor"></i></i></li>
+                    <li class="borderColor"><i class="tag borderColor"></i></li>
                     <input type="color" id="borderColor" style="display: none"/>
                     <li class="borderStyle" style="position: relative">
                         <i class="tag borderStyleIcon"></i>
@@ -173,12 +173,12 @@
 </div>
 
 <!--设计后获取表格的代码-->
-<textarea id="getHtml"></textarea>
-<input type="button" value="生成代码" onClick="getHtml()">
+<%--<textarea id="getHtml"></textarea>--%>
+<%--<input type="button" value="生成代码" onClick="getHtml()">
 
 
 <!--再进入编辑状态，将代码还原-->
-<input type="button" value="编辑已生成的表格" onClick="setHtml()">
+<input type="button" value="编辑已生成的表格" onClick="setHtml()">--%>
 </body>
 
 </html>

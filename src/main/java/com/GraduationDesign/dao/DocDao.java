@@ -26,5 +26,5 @@ public interface DocDao {
     Boolean in_update(Update update);
 
     //获取文档内的最新数据
-    List<Update> getNewUpdate(Integer doc, Integer user);
+    List<Update> getNewUpdate(Integer doc);
 }

@@ -14,13 +14,12 @@
     <h1>消息：</h1>
     <div style="background: lightgrey" id="message"></div>
 
-    <div id="excel-include"></div>
+    <div class="excel-include"></div>
+
 </body>
 <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/sockjs-client/1.4.0/sockjs.min.js"></script>
-<script language="JavaScript">
-    $("#excel-include").load("excel.html")
-</script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
     //设置websocket地址
     var path = location.host+ "${pageContext.request.contextPath}/"
@@ -54,11 +53,8 @@
         setMessageInnerHTML("网络连接成功")
         socket.send("${sessionScope.user}"+"进入本文档")
     }
-    /*监听消息*/
-    socket.onmessage = function (ev) {
-        setMessageInnerHTML(ev.data)
-        //socket.close();
-    }
+
+
 
     /*客户端关闭连接*/
     /*socket.close()*/
@@ -81,5 +77,8 @@
     }
 
 
+</script>
+<script language="JavaScript">
+    $(".excel-include").load("excel.jsp")
 </script>
 </html>

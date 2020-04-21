@@ -229,6 +229,10 @@ function uploadExcel(jsonObj){
     })
 }
 
+function joinExcel() {
+    toEdit($("#docId").val())
+}
+
 //进入编辑页面
 function toEdit(id){
     $.ajax({
@@ -239,7 +243,12 @@ function toEdit(id){
         },
         dataType:"json",
         success:function(response){
-            console.log(response)
+            let str = ""
+            for(let i in response.data){
+                str += response.data[i].sheet + ","
+                str += response.data[i].position + ","
+                str += response.data[i].text + ";"
+            }
             //未登录
             if(response.status == 10){
                 alert(response.data)
@@ -249,7 +258,7 @@ function toEdit(id){
                 alert(response.data)
             }else if(response.status == 1){
                 //上传成功
-                window.location.href = pagecontext + response.msg
+                window.location.href = pagecontext + response.msg + '?data=' + encodeURI(str)
             }
         }
     })

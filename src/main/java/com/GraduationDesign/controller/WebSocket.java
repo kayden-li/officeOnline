@@ -47,7 +47,7 @@ public class WebSocket {
                 this.client = new HashMap<>();
             }
             //将自己添加进该组
-            this.client.put(user.toString(), session);
+            this.client.put(user.toString(), this.session);
             //更新在线用户
             groups.put(doc.toString(), this.client);
         }else{
@@ -92,7 +92,11 @@ public class WebSocket {
     public void sendMessageAll(String message) {
         this.client = groups.get(doc);
         for (Session item : client.values()) {
-            item.getAsyncRemote().sendText(message);
+            //跳过自己
+            if(this.session == item){
+                continue;
+            }
+            item.getAsyncRemote().sendText(this.user + "," + message);
         }
     }
 }

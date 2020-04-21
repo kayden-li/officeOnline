@@ -25,7 +25,7 @@
 
     <!--查找文档编号-->
     <select id="getNewUpdate" resultType="update">
-        select * from gd_update where doc=#{0} and user=#{1}
+        select * from gd_update where doc=#{doc}
     </select>
 
 <!--  <insert id="addOneUser" parameterType="user">

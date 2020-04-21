@@ -80,7 +80,7 @@ public class DocServiceImpl implements DocService {
         return HigherResponse.getResponseSuccess("上传成功", id);
     }
 
-    public HigherResponse toEdit(HttpServletRequest request, Integer doc){
+    public HigherResponse<List<Update>> toEdit(HttpServletRequest request, Integer doc){
         //验证登录
         Integer user = (Integer) request.getSession().getAttribute("user");
         if(user == null){
@@ -90,11 +90,9 @@ public class DocServiceImpl implements DocService {
         if(null == doc){
             return HigherResponse.getResponseSuccess();
         }
-        List<Update> updates = docDao.getNewUpdate(doc, user);
-        //将updates写入session
-        request.getSession().setAttribute("updates", updates);
+        List<Update> updates = docDao.getNewUpdate(doc);
         //返回跳转成功
-        return HigherResponse.getResponseSuccess("/chat.jsp");
+        return HigherResponse.getResponseSuccess("/chat.jsp", updates);
     }
 
     /**
