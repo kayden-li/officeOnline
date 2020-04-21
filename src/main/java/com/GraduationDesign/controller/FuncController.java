@@ -38,7 +38,12 @@ public class FuncController {
     }
 
     @RequestMapping("/edit")
-    public HigherResponse edit(HttpServletRequest request, @RequestParam(required = false) Integer doc){
+    public HigherResponse edit(HttpServletRequest request, Integer doc){
         return docService.toEdit(request, doc);
+    }
+
+    @RequestMapping("/data")
+    public HigherResponse data(HttpServletRequest request, Integer doc){
+        return docService.getData(request, doc);
     }
 }

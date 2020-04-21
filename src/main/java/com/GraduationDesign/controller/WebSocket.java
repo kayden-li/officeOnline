@@ -84,7 +84,9 @@ public class WebSocket {
     //该方法不需要事务支持
     public void onError(Throwable error) {
         error.printStackTrace();
-        session.getAsyncRemote().sendText("抱歉，您的连接出现错误，请重新连接");
+        synchronized (session) {
+            session.getAsyncRemote().sendText("抱歉，您的连接出现错误，请重新连接");
+        }
     }
 
     //@Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -96,7 +98,9 @@ public class WebSocket {
             if(this.session == item){
                 continue;
             }
-            item.getAsyncRemote().sendText(this.user + "," + message);
+            synchronized (item) {
+                item.getAsyncRemote().sendText(this.user + "," + message);
+            }
         }
     }
 }

@@ -24,8 +24,13 @@
     </insert>
 
     <!--查找文档编号-->
-    <select id="getNewUpdate" resultType="update">
+    <select id="getUpdate" resultType="update">
         select * from gd_update where doc=#{doc}
+    </select>
+
+    <!--根据docID查找文档-->
+    <select id="find_doc" resultType="update" parameterType="Integer">
+      SELECT * FROM gd_doc WHERE id = #{doc} limit 1
     </select>
 
 <!--  <insert id="addOneUser" parameterType="user">

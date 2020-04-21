@@ -3,12 +3,13 @@
         let selectTd;
         //当前复制的单元格样式
         let selectTdStyle = {};
-        //上次修改的内容及位置
-        let lastTd = {'pos':null,'text':null}
         //本次修改的内容及位置
-        let thisTd = {'pos':null,'text':null}
+        let thisTd = {'pos':{'row':null,'col':null},'text':null,'change':false}
         //保存table用于显示消息
         let table_T = null
+
+        let pagecontext = $("#pagecontext").val()
+
         $.fn.extend({
             Excel: function (options) {
                 var op = $.extend({}, options);
@@ -159,6 +160,18 @@
                     if (!ele.is("table") && table.data("beg-td-ele") && table.data("beg-td-ele").is(ele)) {
                         ele.addClass("td-chosen-css");
                         var posi = getTdPosition(ele);
+                        //如果点击位置的内容发生改变，就把改变发送出去
+                        if(thisTd.change){
+                            let str = thisTd.pos.row + "," + thisTd.pos.col + "," + thisTd.text + "," + thisTd.change.toString()
+                            socket.send(str)
+                            //发送完毕
+                            thisTd.change = false
+                        }
+                        //发送点击位置
+                        let str = posi.row + "," + posi.col
+                        socket.send(str)
+                        thisTd.pos = posi
+
                         table.find("tr").find("td:eq(" + posi.col + ")").addClass("td-position-css");
                         table.find("tr:eq(" + posi.row + ")").find("td").addClass("td-position-css")
                     } else {
@@ -180,6 +193,7 @@
         //赋值文本框   改变之后赋值到td内
         function setSelectTdValue(ele) {
             let val = $(ele).html();
+
             let $input = $('#selectTdValue');
             $input.val(val);
             setTimeout(function () {
@@ -189,11 +203,12 @@
 
         //赋值文本框  change事件
         function valueChange() {
+            thisTd.change = true
             let val = $('#selectTdValue').val();
+            thisTd.text = val;
             if (selectTd) {
                 selectTd.html(val)
             }
-            thisTd.text = val
         }
 
         //设置点击td时   赋值文本框的事件
@@ -205,19 +220,6 @@
             let pos_ABC = getChar(pos.col - 1) + pos.row
             $('#coordinate').html('<span>' + pos_ABC + "</span>")
             setSelectTdValue(e);
-
-            //位置发生改变
-            if(thisTd.pos != lastTd.pos) {
-                //内容发生改变
-                if(lastTd.text != thisTd.text) {
-                    //此时，lastTd内保存的是上上一次的位置
-                    //thisTd保存的才是上一次的位置
-                    lastTd.text = thisTd.text
-                    update(thisTd)
-                }
-                lastTd.pos = thisTd.pos
-            }
-            thisTd.pos = pos_ABC
         }
 
         //判断元素是否有某属性
@@ -1428,8 +1430,12 @@
         }
         /*监听消息*/
         socket.onmessage = function (ev) {
-            setMessageInnerHTML(ev.data)
-            displayData(ev.data)
+            let datas = ev.data.split(',')
+            if(datas.length < 3) {
+                setMessageInnerHTML(ev.data)
+                return
+            }
+            displayData(datas)
             //socket.close();
         }
         //绑定初始数据
@@ -1437,25 +1443,37 @@
             //保存table
             table_T = t;
 
-            var loc = location.href;
-            var n1 = loc.length;
-            var n2 = loc.indexOf('=');
-            var data = decodeURI(loc.substr(n2+1,n1-n2));
-
-            var dataList = data.split(';')
-            dataList.pop(dataList.length - 1)
-
-            for(let i in dataList){
-                let item = dataList[i].split(',')
-                if(verifyData(item[1])){
-                    let row = item[1].charAt(1)
-                    let col = stringToNum(item[1].charAt(0))
-                    if(item[0] != 'sas'){
-                        let test = t.find("tr:eq("+row+") td:eq("+col+")")
-                        test.html(item[2])
-                    }
-                }
+            let doc = $("#s_doc").val()
+            let data = null
+            if(doc == null || doc == undefined || doc == ""){
+                return
             }
+
+            $.ajax({
+                type:"post",
+                url:pagecontext+"/excel/data",
+                data:{
+                    doc:doc,
+                },
+                dataType:"json",
+                success:function(response) {
+                    data = response.data
+
+                    if (null == data || data == undefined) {
+                        return
+                    }
+
+                    for(item in data){
+                        let row = data[item].position.charAt(1)
+                        let col = stringToNum(data[item].position.charAt(0))
+                        let test = t.find("tr:eq(" + row + ") td:eq(" + col + ")")
+                        test.html(data[item].text)
+                    }
+
+                }
+            })
+
+
         }
 
         //将字母转换为数字
@@ -1479,20 +1497,35 @@
             return verify_code.test(pos)
         }
 
-        function displayData(data){
-            let datas = data.split(',')
-            if(datas.length < 3){
-                return
-            }
-            console.log(datas)
-            if(verifyData(datas[1])){
-                let row = datas[1].charAt(1)
-                let col = stringToNum(datas[1].charAt(0))
-                if(datas[0] != 'sas'){
-                    let test = table_T.find("tr:eq("+row+") td:eq("+col+")")
-                    test.html(datas[2])
+        function displayData(datas){
+            if(datas.length == 3){
+                //清除其他用户之前位置的背景颜色
+                if(users.includes(user_pos)){
+                    users.pop(user_pos)
                 }
+                let row = datas[1]
+                let col = datas[2]
+                let t = table_T.find("tr:eq(" + row + ") td:eq(" + col + ")")
+                setOthersSelect(t)
+            }else if(datas.length == 5){
+                let row = datas[1]
+                let col = datas[2]
+                let test = table_T.find("tr:eq(" + row + ") td:eq(" + col + ")")
+                test.html(datas[3])
             }
+        }
+
+        function setOthersSelect(t){
+            let r = Math.random() * 255
+            r = Math.round(r)
+            let g = Math.random() * 255
+            r = Math.round(g)
+            let b = Math.random() * 255
+            r = Math.round(b)
+            let style = "rgba("+ r+","+g+","+b+"," +"1)"
+            t = t[0]
+            t.style.background = style
+
         }
 
     }

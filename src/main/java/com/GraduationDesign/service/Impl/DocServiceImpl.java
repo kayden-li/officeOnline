@@ -80,19 +80,36 @@ public class DocServiceImpl implements DocService {
         return HigherResponse.getResponseSuccess("上传成功", id);
     }
 
-    public HigherResponse<List<Update>> toEdit(HttpServletRequest request, Integer doc){
+    public HigherResponse toEdit(HttpServletRequest request, Integer doc){
         //验证登录
         Integer user = (Integer) request.getSession().getAttribute("user");
         if(user == null){
             return HigherResponse.noLogin();
         }
-        //获取数据库中的最新update
-        if(null == doc){
-            return HigherResponse.getResponseSuccess();
+
+        if(null == doc || doc<=0){
+            return HigherResponse.getResponseFailed("请输入文档名");
         }
-        List<Update> updates = docDao.getNewUpdate(doc);
+        //若数据库内有该文档，将用户所要编辑的文档写入session中
+        if(null != docDao.find_doc(doc)) {
+            request.getSession().setAttribute("doc", doc);
+        }
         //返回跳转成功
-        return HigherResponse.getResponseSuccess("/chat.jsp", updates);
+        return HigherResponse.getResponseSuccess("/chat.jsp");
+    }
+
+    public HigherResponse<List<Update>> getData(HttpServletRequest request, Integer doc){
+        //验证登录
+        Integer user = (Integer) request.getSession().getAttribute("user");
+        if(user == null){
+            return HigherResponse.noLogin();
+        }
+        if(null == doc || doc<=0){
+            return HigherResponse.getResponseFailed("请输入文档名");
+        }
+        List<Update> datas = docDao.getUpdate(doc);
+
+        return HigherResponse.getResponseSuccess(datas);
     }
 
     /**

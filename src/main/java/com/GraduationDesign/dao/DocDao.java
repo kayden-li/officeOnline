@@ -25,6 +25,9 @@ public interface DocDao {
     //插入源文件内的数据
     Boolean in_update(Update update);
 
-    //获取文档内的最新数据
-    List<Update> getNewUpdate(Integer doc);
+    //获取文档内的数据
+    List<Update> getUpdate(Integer doc);
+
+    //查找文档id有没有对用的文档
+    Update find_doc(Integer doc);
 }

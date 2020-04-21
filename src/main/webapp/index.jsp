@@ -14,7 +14,7 @@
     <div class="row" style="margin-top: 25%; margin-left: 20%;">
         <div class="col-xs-7">
             <button class="btn btn-large btn-success btn-block" type="button" onclick="$('#file').click()">上传文件</button>
-            <button class="btn btn-large btn-success btn-block" type="button" style="margin-top: 5%;" onclick="toEdit()">新建文件</button>
+            <button class="btn btn-large btn-success btn-block" type="button" style="margin-top: 5%;" onclick="toNewExcel()">新建文件</button>
             <div>
                 <input id="docId" class="input-large" style="margin-top: 7%;margin-left: 5%;" ></input>
                 <button  class="btn btn-mini btn-success" type="button" style="margin-left: 5%;" onclick="joinExcel()">加入文档</button>

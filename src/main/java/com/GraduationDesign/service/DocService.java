@@ -22,4 +22,7 @@ public interface DocService {
 
     //跳转至编辑页
     HigherResponse toEdit(HttpServletRequest request, Integer doc);
+
+    //获取文档对应的数据
+    HigherResponse getData(HttpServletRequest request, Integer doc);
 }

@@ -172,6 +172,10 @@
 <div class="excel" onselectstart="return false">
 </div>
 
+<%--获取session中的doc--%>
+<input style="display: none;" id="s_doc" value="${sessionScope.doc}">
+<input style="display: none;" id="pagecontext" value="${pageContext.request.contextPath}">
+
 <!--设计后获取表格的代码-->
 <%--<textarea id="getHtml"></textarea>--%>
 <%--<input type="button" value="生成代码" onClick="getHtml()">
