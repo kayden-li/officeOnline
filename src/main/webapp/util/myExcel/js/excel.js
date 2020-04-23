@@ -7,8 +7,12 @@
         let thisTd = {'pos':{'row':null,'col':null},'text':null,'change':false}
         //保存table用于显示消息
         let table_T = null
-
+        //项目路径
         let pagecontext = $("#pagecontext").val()
+        //其他用户的颜色及占用位置
+        let users = new Array()
+        //其他用户对象
+        let user = {'id':null,'color':null,'td':null}
 
         $.fn.extend({
             Excel: function (options) {
@@ -122,6 +126,8 @@
             //生成table
             else if (setting.type == 1) {
                 table = $("<table></table>").appendTo(t);
+                //保存table
+                table_T = table
                 for (var i = 0; i < setting.row; i++) {
                     var tr = $("<tr></tr>").height(25).appendTo(table);
                     for (var j = 0; j < setting.col; j++) {
@@ -203,8 +209,18 @@
 
         //赋值文本框  change事件
         function valueChange() {
-            thisTd.change = true
+            let readOnly = false
+            for(let i in users) {
+                if (selectTd[0] == users[i].td){
+                    readOnly = true
+                }
+            }
             let val = $('#selectTdValue').val();
+            if(!readOnly) {
+                thisTd.change = true
+            }else{
+                val = '已被占用'
+            }
             thisTd.text = val;
             if (selectTd) {
                 selectTd.html(val)
@@ -1433,15 +1449,22 @@
             let datas = ev.data.split(',')
             if(datas.length < 3) {
                 setMessageInnerHTML(ev.data)
+                if(datas[1] == 'close'){
+                    for(let i in users){
+                        //找到该用户，清除占用格，删除该用户，跳出循环
+                        if ((users[i].id == datas[0])){
+                            users[i].td.style['backgroundColor'] = ""
+                            users.splice(i, 1)
+                            break
+                        }
+                    }
+                }
                 return
             }
             displayData(datas)
-            //socket.close();
         }
         //绑定初始数据
         function bindData(t){
-            //保存table
-            table_T = t;
 
             let doc = $("#s_doc").val()
             let data = null
@@ -1473,7 +1496,7 @@
                 }
             })
 
-
+            socket.send("get")
         }
 
         //将字母转换为数字
@@ -1499,14 +1522,36 @@
 
         function displayData(datas){
             if(datas.length == 3){
-                //清除其他用户之前位置的背景颜色
-                if(users.includes(user_pos)){
-                    users.pop(user_pos)
-                }
+                console.log("qqq")
+                //定位其他用户的点击位置
                 let row = datas[1]
                 let col = datas[2]
                 let t = table_T.find("tr:eq(" + row + ") td:eq(" + col + ")")
-                setOthersSelect(t)
+
+                for(let i in users){
+                    //找到该用户，则跳出循环
+                    if ((users[i].id == datas[0])){
+                        user = users[i]
+                        break
+                    }
+                }
+                //若没有从users中找到该用户
+                if(user.id == null){
+                    //产生随机颜色
+                    let r = Math.random() * 255 / 2 + 122
+                    r = Math.round(r)
+                    let g = Math.random() * 255 / 2 + 122
+                    g = Math.round(g)
+                    let b = Math.random() * 255 / 2 + 122
+                    b = Math.round(b)
+                    let style = "rgb("+ r+","+g+","+b+")"
+
+                    user.id = datas[0]
+                    user.color = style
+
+                    users.push(user)
+                }
+                setOthersSelect(t[0])
             }else if(datas.length == 5){
                 let row = datas[1]
                 let col = datas[2]
@@ -1516,16 +1561,36 @@
         }
 
         function setOthersSelect(t){
-            let r = Math.random() * 255
-            r = Math.round(r)
-            let g = Math.random() * 255
-            r = Math.round(g)
-            let b = Math.random() * 255
-            r = Math.round(b)
-            let style = "rgba("+ r+","+g+","+b+"," +"1)"
-            t = t[0]
-            t.style.background = style
-
+            //此时user中存放的是上一个td
+            let tOld = user.td
+            //上一个td颜色恢复
+            if(tOld != null || tOld != undefined) {
+                //先清除行内样式
+                tOld.style['backgroundColor'] = ""
+                //再设置行内样式
+                let isRead = false
+                for(let i in users) {
+                    if(users[i].td == tOld){
+                        tOld.setAttribute("background-color", users[i].color)
+                        isRead = true
+                    }
+                }
+                if(!isRead) {
+                    tOld.setAttribute("background-color", "rgb(255，255，255)")
+                }
+            }
+            //设置当前用户颜色
+            t.style['backgroundColor'] = user.color
+            //更新保存的位置
+            user.td = t;
+            //将更新user放入users中
+            for(let i in users){
+                if (users[i].id == user.id){
+                    users[i] = user
+                }
+            }
+            //清空user
+            user = {'id':null,'color':null,'td':null}
         }
 
     }

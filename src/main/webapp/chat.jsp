@@ -51,7 +51,7 @@
     /*打开socket*/
     socket.onopen = function (ev) {
         setMessageInnerHTML("网络连接成功")
-        socket.send("${sessionScope.user}"+"进入本文档")
+        socket.send("join")
     }
 
 
@@ -69,6 +69,8 @@
 
     //关闭WebSocket连接
     function closeWebSocket() {
+        alert("close")
+        socket.send("close")
         socket.close();
     }
     //将消息显示在网页上
