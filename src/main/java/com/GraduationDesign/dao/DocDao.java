@@ -1,5 +1,6 @@
 package com.GraduationDesign.dao;
 
+import com.GraduationDesign.enity.Doc;
 import com.GraduationDesign.enity.Update;
 import com.GraduationDesign.enity.Upload;
 import org.springframework.stereotype.Repository;
@@ -25,9 +26,18 @@ public interface DocDao {
     //插入源文件内的数据
     Boolean in_update(Update update);
 
+    //获取一个文档所有的sheet名
+    List<String> getAllSheetsByDoc(Integer doc);
+
     //获取文档内的数据
-    List<Update> getUpdate(Integer doc);
+    List<Update> getUpdate(String sheet, Integer doc);
 
     //查找文档id有没有对用的文档
-    Update find_doc(Integer doc);
+    Doc find_doc(Integer doc);
+
+    //新建文档
+    Boolean createDoc(String docName);
+
+    //更新update
+    Boolean update(Update update);
 }

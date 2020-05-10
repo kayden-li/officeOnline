@@ -1,5 +1,8 @@
 package com.GraduationDesign.common;
 
+import com.GraduationDesign.enity.User;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
 
 /**
@@ -21,5 +24,26 @@ public class Verify {
             sb.append(base.charAt(number));
         }
         return sb.toString();
+    }
+
+    public static Boolean verifyLogin(HttpServletRequest request){
+        Integer user = (Integer) request.getSession().getAttribute("user");
+        if(user == null){
+            return false;
+        }
+        return true;
+    }
+    public static Integer getUser(HttpServletRequest request){
+        return (Integer) request.getSession().getAttribute("user");
+    }
+    public static Boolean verifyDoc(HttpServletRequest request){
+        Integer doc = (Integer) request.getSession().getAttribute("doc");
+        if(null == doc || doc<=0){
+            return false;
+        }
+        return true;
+    }
+    public static Integer getDoc(HttpServletRequest request){
+        return (Integer) request.getSession().getAttribute("doc");
     }
 }

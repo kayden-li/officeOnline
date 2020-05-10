@@ -37,10 +37,10 @@ public class DocServiceImpl implements DocService {
 
     @Override
     public HigherResponse upload(HttpServletRequest request, String data) {
-        Integer user = (Integer) request.getSession().getAttribute("user");
-        if(user == null){
+        if(!Verify.verifyLogin(request)){
             return HigherResponse.noLogin();
         }
+        Integer user = Verify.getUser(request);
         Upload upload = new Gson().fromJson(data, Upload.class);
         //获取文件名+"_"+时间
         String excelName = upload.getExcelName()+"_"+System.currentTimeMillis();
@@ -48,7 +48,6 @@ public class DocServiceImpl implements DocService {
         upload.setExcelName(excelName);
         //上传文件信息
         docDao.upload(upload);
-
 
         //获取数据库内excel的id
         Integer id = docDao.searchIdByName(excelName);
@@ -64,52 +63,114 @@ public class DocServiceImpl implements DocService {
             //将修改好的所有update集合
             updates.addAll(sheet_2_Update(id, user, (Upload.UploadBean) uploadBean.get(i)));
         }
-        //用于暂存update，若上传出错，可根据它获得报错位置
-        Update updateT = new Update();
         //上传update
         for (Update update : updates) {
-            updateT = update;
-
             try {
                 docDao.in_update(update);
             }catch (Exception e){
                 e.printStackTrace();
-                return HigherResponse.getResponseFailed("位置："+updateT.getPosition()+"已经存在，本条数据未上传成功");
+                //此处有一条报错就会返回结果，可以改为把所有结果收集起来一起返回结果
+                return HigherResponse.getResponseFailed("位置："+update.getPosition()+"已经存在，本条数据未上传成功");
             }
         }
         return HigherResponse.getResponseSuccess("上传成功", id);
     }
 
     public HigherResponse toEdit(HttpServletRequest request, Integer doc){
-        //验证登录
-        Integer user = (Integer) request.getSession().getAttribute("user");
-        if(user == null){
+        //验证用户是否登录
+        if(!Verify.verifyLogin(request)){
             return HigherResponse.noLogin();
         }
+        Boolean flag = true;
+        List<String> sheets = docDao.getAllSheetsByDoc(doc);
+        //文档没有sheet
+        if(sheets == null || sheets.size() == 0) {
+            //没有文档
+            if (doc == null) {
+                //新建文档
+                String docName = "new_" + System.currentTimeMillis();
 
-        if(null == doc || doc<=0){
-            return HigherResponse.getResponseFailed("请输入文档名");
+                docDao.createDoc(docName);
+
+                doc = docDao.searchIdByName(docName);
+            }
+            sheets = new ArrayList();
+            sheets.add("Sheet1");
+            sheets.add("Sheet2");
+            sheets.add("Sheet3");
+
+            flag = false;
+            //将选择的sheet写入session中
+            request.getSession().setAttribute("Ssheet", "Sheet1");
         }
-        //若数据库内有该文档，将用户所要编辑的文档写入session中
-        if(null != docDao.find_doc(doc)) {
-            request.getSession().setAttribute("doc", doc);
+        if(flag){
+            //将sheet插入session中
+            request.getSession().setAttribute("Ssheet", sheets.get(0));
         }
+        for (int i = 0; i < sheets.size(); i++) {
+            sheets.set(i, "\"" + sheets.get(i) + "\"");
+        }
+        //将sheet插入session中
+        request.getSession().setAttribute("sheet", sheets);
+
+        //将doc写入session中
+        request.getSession().setAttribute("doc", doc);
         //返回跳转成功
         return HigherResponse.getResponseSuccess("/chat.jsp");
     }
 
-    public HigherResponse<List<Update>> getData(HttpServletRequest request, Integer doc){
-        //验证登录
+    //获取一个sheet的所有update数据
+    public HigherResponse<List<Update>> getData(HttpServletRequest request){
+        //验证用户是否登录
+        if(!Verify.verifyLogin(request)){
+            return HigherResponse.noLogin();
+        }
+        //从session中取出sheet
+        String sheet = (String) request.getSession().getAttribute("Ssheet");
+        //从session中取出doc
+        Integer doc = (Integer)request.getSession().getAttribute("doc");
+        //验证用户是否选择sheet
+        if(null == sheet || "".equals(sheet) ||
+            null == doc || "".equals(doc)){
+            return HigherResponse.getResponseFailed("连接出错，请重新连接");
+        }
+
+        //从数据库中取出sheet内容
+        List<Update> datas = docDao.getUpdate(sheet, doc);
+
+        return HigherResponse.getResponseSuccess(datas);
+    }
+
+    public HigherResponse update(HttpServletRequest request, Update update){
+        //验证用户是否登录
         Integer user = (Integer) request.getSession().getAttribute("user");
         if(user == null){
             return HigherResponse.noLogin();
         }
+        //验证用户是否选择文档
+        Integer doc = (Integer) request.getSession().getAttribute("doc");
         if(null == doc || doc<=0){
-            return HigherResponse.getResponseFailed("请输入文档名");
+            return HigherResponse.getResponseFailed("连接出错，请重试");
         }
-        List<Update> datas = docDao.getUpdate(doc);
+        String sheet = (String) request.getSession().getAttribute("Ssheet");
+        if(null == sheet || "".equals(sheet)){
+            return HigherResponse.getResponseFailed("连接出错，请重试");
+        }
+        //设置用户更新的文档
+        update.setDoc(doc);
+        //设置用户
+        update.setUser(user);
+        //设置用户更新的sheet
+        update.setSheet(sheet);
 
-        return HigherResponse.getResponseSuccess(datas);
+        //若不是添加数据，则更新数据
+        if(!docDao.in_update(update)) {
+            //若插入、更新都不成功，则返回失败
+            if (!docDao.update(update)) {
+                return HigherResponse.getResponseFailed("更新失败");
+            }
+        }
+        return HigherResponse.getResponseSuccess();
     }
 
     /**
@@ -140,4 +201,5 @@ public class DocServiceImpl implements DocService {
         //返回所有的update
         return updates;
     }
+
 }

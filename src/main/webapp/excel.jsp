@@ -7,7 +7,6 @@
     <link rel="stylesheet" type="text/css" href="util/myExcel/css/main.css">
     <script type="text/javascript" src="util/myExcel/js/jquery-2.0.3.js"></script>
     <script type="text/javascript" src="util/myExcel/js/excel.js"></script>
-    <script type="text/javascript" src="util/myExcel/js/windowFun.js"></script>
     <link rel="stylesheet" href="util/myExcel/css/excel.css" type="text/css"/>
     <script type="text/javascript">
         $(function () {
@@ -169,13 +168,17 @@
 <div style="width: 100%;display: flex;">
     <input type="text" id="selectTdValue" style="width: 100%;outline:none;">
 </div>
+<%--生成excel的地方--%>
 <div class="excel" onselectstart="return false">
 </div>
 
 <%--获取session中的doc--%>
 <input style="display: none;" id="s_doc" value="${sessionScope.doc}">
+<%--获取项目链接--%>
 <input style="display: none;" id="pagecontext" value="${pageContext.request.contextPath}">
 
+
+</ul>
 <!--设计后获取表格的代码-->
 <%--<textarea id="getHtml"></textarea>--%>
 <%--<input type="button" value="生成代码" onClick="getHtml()">

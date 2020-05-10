@@ -24,7 +24,7 @@
             </div>
 
             <div class="col-xs-9 tab-content">
-                <ul class="list-group tab-pane fade in active" id="login">
+                <ul class="list-group tab-pane fade in active" id="login" onkeydown="keyLogin()">
                     <a class="list-group-item active"> 登录 </a>
                     <div role="form" id="L_form">
                         <div class="form-group">
@@ -38,7 +38,7 @@
                         <button id="loginBtn" class="btn btn-default">提交</button>
                     </div>
                 </ul>
-                <ul class="list-group tab-pane fade" id="register">
+                <ul class="list-group tab-pane fade" id="register" onkeydown="keyRegister()">
                     <a class="list-group-item active"> 注册 </a>
                     <div role="form" id="R_form">
                         <div class="form-group">
@@ -67,6 +67,17 @@
 <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script type="text/javascript">
+    //回车事件
+    function keyLogin() {
+        if(event.keyCode == 13){
+            $("#loginBtn").click()
+        }
+    }
+    function keyRegister() {
+        if(event.keyCode == 13){
+            $("#registerBtn").click()
+        }
+    }
     //登录ajax
     function loginAjax(name, password){
         $.ajax({
@@ -87,6 +98,7 @@
             }
         })
     }
+
     //登录表单提交
     $("#loginBtn").click(function(){
         if(!toLVaild()){

@@ -1,4 +1,4 @@
-package com.GraduationDesign.listener;
+package com.GraduationDesign.common.websocket;
 
 import org.springframework.stereotype.Component;
 
@@ -6,7 +6,6 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * @author 李帆

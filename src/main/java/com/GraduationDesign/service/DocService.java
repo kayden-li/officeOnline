@@ -1,9 +1,11 @@
 package com.GraduationDesign.service;
 
 import com.GraduationDesign.common.HigherResponse;
+import com.GraduationDesign.enity.Update;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * @author 李帆
@@ -23,6 +25,10 @@ public interface DocService {
     //跳转至编辑页
     HigherResponse toEdit(HttpServletRequest request, Integer doc);
 
-    //获取文档对应的数据
-    HigherResponse getData(HttpServletRequest request, Integer doc);
+    //获取sheet对应的数据
+    HigherResponse getData(HttpServletRequest request);
+
+    //上传更新数据
+    HigherResponse update(HttpServletRequest request, Update update);
+
 }

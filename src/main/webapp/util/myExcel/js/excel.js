@@ -13,6 +13,9 @@
         let users = new Array()
         //其他用户对象
         let user = {'id':null,'color':null,'td':null}
+        //分隔符
+        let sym = "([,])"
+
 
         $.fn.extend({
             Excel: function (options) {
@@ -165,16 +168,17 @@
                     clearPositionCss(table);
                     if (!ele.is("table") && table.data("beg-td-ele") && table.data("beg-td-ele").is(ele)) {
                         ele.addClass("td-chosen-css");
-                        var posi = getTdPosition(ele);
+                        let posi = getTdPosition(ele);
                         //如果点击位置的内容发生改变，就把改变发送出去
                         if(thisTd.change){
-                            let str = thisTd.pos.row + "," + thisTd.pos.col + "," + thisTd.text + "," + thisTd.change.toString()
-                            socket.send(str)
-                            //发送完毕
-                            thisTd.change = false
+                            let str = thisTd.pos.row + sym + thisTd.pos.col + sym + thisTd.text
+
+                            //向服务器更新数据库
+                            updateText(str);
+
                         }
                         //发送点击位置
-                        let str = posi.row + "," + posi.col
+                        let str = posi.row + sym + posi.col
                         socket.send(str)
                         thisTd.pos = posi
 
@@ -199,7 +203,6 @@
         //赋值文本框   改变之后赋值到td内
         function setSelectTdValue(ele) {
             let val = $(ele).html();
-
             let $input = $('#selectTdValue');
             $input.val(val);
             setTimeout(function () {
@@ -209,19 +212,14 @@
 
         //赋值文本框  change事件
         function valueChange() {
-            let readOnly = false
             for(let i in users) {
                 if (selectTd[0] == users[i].td){
-                    readOnly = true
+                    return
                 }
             }
+            thisTd.change = true
             let val = $('#selectTdValue').val();
-            if(!readOnly) {
-                thisTd.change = true
-            }else{
-                val = '已被占用'
-            }
-            thisTd.text = val;
+            thisTd.text = val
             if (selectTd) {
                 selectTd.html(val)
             }
@@ -1431,34 +1429,11 @@
             }
         }
 
-        //上传更改的内容
-        function update(Td) {
-            if(verifyData(Td.pos)) {
-                socket.send(Td.pos+","+Td.text)
-            }else{
-                setMessageInnerHTML("消息位置发生错误")
-            }
-            //清空暂存的内容
-            if(thisTd.text == "") {
-                thisTd.text = null
-                lastTd.text = null
-            }
-        }
         /*监听消息*/
         socket.onmessage = function (ev) {
-            let datas = ev.data.split(',')
+            let datas = ev.data.split(sym)
             if(datas.length < 3) {
                 setMessageInnerHTML(ev.data)
-                if(datas[1] == 'close'){
-                    for(let i in users){
-                        //找到该用户，清除占用格，删除该用户，跳出循环
-                        if ((users[i].id == datas[0])){
-                            users[i].td.style['backgroundColor'] = ""
-                            users.splice(i, 1)
-                            break
-                        }
-                    }
-                }
                 return
             }
             displayData(datas)
@@ -1475,13 +1450,9 @@
             $.ajax({
                 type:"post",
                 url:pagecontext+"/excel/data",
-                data:{
-                    doc:doc,
-                },
                 dataType:"json",
                 success:function(response) {
                     data = response.data
-
                     if (null == data || data == undefined) {
                         return
                     }
@@ -1521,22 +1492,50 @@
         }
 
         function displayData(datas){
-            if(datas.length == 3){
-                console.log("qqq")
+            //收到删除用户消息
+            if(datas[0] == "remove"){
+                let t = table_T.find("tr:eq(" + datas[2] + ") td:eq(" + datas[3] + ")")[0]
+                //从用户列表中删除该用户
+                for(let i in users) {
+                    if(users[i].id == datas[1]){
+                        users.splice(i, 1)
+                        break
+                    }
+                }
+                //恢复该用户所占格子样式
+                if(t != null) {
+                    //先清除行内样式
+                    t.style['backgroundColor'] = ""
+                    //再设置行内样式
+                    let isRead = false
+                    for(let i in users) {
+                        if(users[i].td == t){
+                            tOld.style['backgroundColor'] = users[i].color
+                            isRead = true
+                        }
+                    }
+                    if(!isRead) {
+                        t.style['backgroundColor'] = "rgb(255，255，255)"
+                    }
+                    return
+                }
+            }
+            //收到其他用户的点击消息
+            if(datas.length == 3) {
                 //定位其他用户的点击位置
                 let row = datas[1]
                 let col = datas[2]
                 let t = table_T.find("tr:eq(" + row + ") td:eq(" + col + ")")
 
-                for(let i in users){
+                for (let i in users) {
                     //找到该用户，则跳出循环
-                    if ((users[i].id == datas[0])){
+                    if ((users[i].id == datas[0])) {
                         user = users[i]
                         break
                     }
                 }
-                //若没有从users中找到该用户
-                if(user.id == null){
+                //若没有从users中找到该用户，新建用户
+                if (user.id == null) {
                     //产生随机颜色
                     let r = Math.random() * 255 / 2 + 122
                     r = Math.round(r)
@@ -1544,23 +1543,28 @@
                     g = Math.round(g)
                     let b = Math.random() * 255 / 2 + 122
                     b = Math.round(b)
-                    let style = "rgb("+ r+","+g+","+b+")"
+                    let style = "rgb(" + r + "," + g + "," + b + ")"
 
                     user.id = datas[0]
                     user.color = style
 
                     users.push(user)
                 }
-                setOthersSelect(t[0])
-            }else if(datas.length == 5){
+                setOthersSelect(t[0], data[3])
+                //收到修改内容消息
+            }else if(datas.length == 4){
+                //此处是其他人修改内容的处理方法
                 let row = datas[1]
                 let col = datas[2]
                 let test = table_T.find("tr:eq(" + row + ") td:eq(" + col + ")")
+                //在页面内设置修改过的内容
                 test.html(datas[3])
+                //将此内容上传至数据库中
+
             }
         }
 
-        function setOthersSelect(t){
+        function setOthersSelect(t, text){
             //此时user中存放的是上一个td
             let tOld = user.td
             //上一个td颜色恢复
@@ -1570,17 +1574,22 @@
                 //再设置行内样式
                 let isRead = false
                 for(let i in users) {
+                    if(user.id == users[i].id){
+                        continue
+                    }
                     if(users[i].td == tOld){
-                        tOld.setAttribute("background-color", users[i].color)
+                        tOld.style['backgroundColor'] = users[i].color
                         isRead = true
                     }
                 }
                 if(!isRead) {
-                    tOld.setAttribute("background-color", "rgb(255，255，255)")
+                    tOld.style['backgroundColor'] = "rgb(255，255，255)"
                 }
             }
             //设置当前用户颜色
-            t.style['backgroundColor'] = user.color
+            if(t != null) {
+                t.style['backgroundColor'] = user.color
+            }
             //更新保存的位置
             user.td = t;
             //将更新user放入users中
@@ -1591,6 +1600,34 @@
             }
             //清空user
             user = {'id':null,'color':null,'td':null}
+        }
+
+        function updateText(str){
+            $.ajax({
+                type:"post",
+                url:pagecontext+"/excel/update",
+                async:false,
+                data:{
+                    str:str
+                },
+                dataType:"json",
+                success:function(response){
+                    //未登录
+                    if(response.status == 10){
+                        alert(response.msg)
+                        window.location.href = pagecontext+"/welcome"
+                    }else if(response.status == 0){
+                        //服务器出错
+                        alert(response.msg)
+                    }else if(response.status == 1){
+                        //更新成功后
+                        //向其他人发送更新文本的消息
+                        socket.send(str)
+                        //发送完毕
+                        thisTd.change = false
+                    }
+                }
+            })
         }
 
     }

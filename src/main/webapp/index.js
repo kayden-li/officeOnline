@@ -233,7 +233,24 @@ function joinExcel() {
     toEdit($("#docId").val())
 }
 function toNewExcel(){
-    window.location.href = pagecontext + "/chat.jsp"
+    $.ajax({
+        type:"post",
+        url:pagecontext+"/excel/edit",
+        dataType:"json",
+        success:function(response){
+            //未登录
+            if(response.status == 10){
+                alert(response.msg)
+                window.location.href = pagecontext+"/welcome"
+            }else if(response.status == 0){
+                //服务器出错
+                alert(response.data)
+            }else if(response.status == 1){
+                //上传成功
+                window.location.href = pagecontext + response.msg
+            }
+        }
+    })
 }
 //进入编辑页面
 function toEdit(id){
@@ -247,7 +264,7 @@ function toEdit(id){
         success:function(response){
             //未登录
             if(response.status == 10){
-                alert(response.data)
+                alert(response.msg)
                 window.location.href = pagecontext+"/welcome"
             }else if(response.status == 0){
                 //服务器出错

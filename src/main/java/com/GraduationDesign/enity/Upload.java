@@ -1,8 +1,5 @@
 package com.GraduationDesign.enity;
 
-import lombok.ToString;
-
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -42,6 +39,10 @@ public class Upload {
             return SheetName;
         }
 
+        public void setSheetName(String name){
+            this.SheetName = name;
+        }
+
         public List<element> getText() {
             return text;
         }
@@ -66,4 +67,5 @@ public class Upload {
     public void setExcelName(String name) {
         this.excelName = name;
     }
+
 }
