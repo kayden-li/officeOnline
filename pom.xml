@@ -137,6 +137,12 @@
                 <artifactId>spring-websocket</artifactId>
                 <version>4.3.14.RELEASE</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-messaging</artifactId>
+                <version>5.2.6.RELEASE</version>
+            </dependency>
+
             <!--gson-->
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -153,6 +159,9 @@
                 <artifactId>fastjson</artifactId>
                 <version>1.2.47</version>
             </dependency>
+
+            
+
         </dependencies>
     <build>
         <finalName>officeOnline</finalName>
