@@ -1,5 +1,7 @@
 package com.GraduationDesign.controller;
 
+import com.GraduationDesign.common.SimpleExcel;
+import com.GraduationDesign.common.Verify;
 import com.GraduationDesign.common.websocket.WebsocketConfig;
 import com.GraduationDesign.service.DocService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 //@Transactional
-//为创建，删除添加事务支持
 @ServerEndpoint(value = "/webSocket/{user}/{doc}/{code}", configurator = WebsocketConfig.class)
 public class WebSocket {
 
@@ -28,8 +29,8 @@ public class WebSocket {
     private Session session;
     private String user;
     private String doc;
-    private String sym = "\\(\\[,\\]\\)";
-    private String sendSym = "([,])";
+    private String sym = Verify.MATCH_SYMBOL;
+    private String sendSym = Verify.SYMBOL;
     //用于保存在线用户
     //<文档，Map<用户，连接>>
     private static final Map<String, Map<String, Session>> GROUPS = new ConcurrentHashMap<>();
@@ -134,7 +135,6 @@ public class WebSocket {
 
     @OnError
     //@Transactional(propagation = Propagation.NOT_SUPPORTED)
-    //该方法不需要事务支持
     public void onError(Throwable error) {
         error.printStackTrace();
         synchronized (session) {
@@ -143,7 +143,6 @@ public class WebSocket {
     }
 
     //@Transactional(propagation = Propagation.NOT_SUPPORTED)
-    //该方法不需要事务支持
     private void sendMessageAll(String message) {
         this.client = GROUPS.get(doc);
         //遍历同组成员

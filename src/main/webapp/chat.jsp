@@ -19,10 +19,19 @@
     <%--excel--%>
     <div class="excel-include"></div>
 
-    <%--sheet列表--%>
-    <div id="sheetList" class="btn-group">
-
+    <div>
+        <%--sheet列表--%>
+        <div id="sheetList" class="btn-group">
+        </div>
+        <div>
+            <div class="btn">
+                <input id="clipBoard" readonly="readonly" style="width: 30px;" value="${sessionScope.doc}"/>
+                <div id="shareDoc"onclick="copyDocCode()"  class="btn btn-success btn-large"></div>
+            </div>
+            <div id="downLoad" onclick="downloadDoc()" class="btn btn-success btn-large">下载文档</div>
+        </div>
     </div>
+
 </body>
 <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/sockjs-client/1.4.0/sockjs.min.js"></script>
@@ -38,6 +47,11 @@
     /*创建一个websocket实例*/
     let socket
 
+    $("#shareDoc").html("点击复制分享码")
+    function copyDocCode(){
+        $("#clipBoard").select()
+        document.execCommand("copy")
+    }
     /*
      * ws开头：websocket协议
      */
@@ -107,6 +121,11 @@
         //向其他用户发送更改sheet的消息
         socket.send("sheet([,])" + ele.innerText)
         window.location.href = "${pageContext.request.contextPath}/excel/changeSheet?sheetName="+ele.innerText
+    }
+    //下载按钮
+    function downloadDoc() {
+        //打开下载页面
+        window.open("${pageContext.request.contextPath}/excel/download")
     }
 
 </script>

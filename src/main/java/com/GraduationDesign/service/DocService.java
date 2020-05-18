@@ -3,7 +3,9 @@ package com.GraduationDesign.service;
 import com.GraduationDesign.common.HigherResponse;
 import com.GraduationDesign.enity.Update;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -30,5 +32,8 @@ public interface DocService {
 
     //上传更新数据
     HigherResponse update(HttpServletRequest request, Update update);
+
+    //下载文件
+    HigherResponse download(HttpServletRequest request, HttpServletResponse response);
 
 }

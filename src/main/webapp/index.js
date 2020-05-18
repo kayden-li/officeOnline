@@ -31,7 +31,8 @@ var readFile = function(event) {
                 x = XLSX;
                 break;
             default:
-                x = null;
+                alert("上传失败，请上传excel文件");
+                return;
         }
         if(x) {
             //以字节流读取的文件内容，里面是文件的所有相关信息

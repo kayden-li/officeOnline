@@ -1,13 +1,18 @@
 package com.GraduationDesign.controller;
 
 import com.GraduationDesign.common.HigherResponse;
+import com.GraduationDesign.common.SimpleExcel;
+import com.GraduationDesign.common.Verify;
 import com.GraduationDesign.enity.Update;
 import com.GraduationDesign.service.DocService;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -59,9 +64,9 @@ public class FuncController {
     @RequestMapping("/update")
     public HigherResponse update(HttpServletRequest request, String str){
         Update update = new Update();
-        String[] datas = str.split("\\(\\[,\\]\\)");
+        String[] datas = str.split(Verify.MATCH_SYMBOL);
         //位置转换及设置
-        StringBuffer sb = new StringBuffer(excelColIndexToStr(Integer.valueOf(datas[1])));
+        StringBuffer sb = new StringBuffer(SimpleExcel.excelColIndexToStr(Integer.valueOf(datas[1])));
         sb.append(datas[0]);
         update.setPosition(sb.toString());
         //设置更新文本
@@ -69,25 +74,9 @@ public class FuncController {
         return docService.update(request, update);
     }
 
-    /**
-     * 将数字转换为字母
-     * @param columnIndex 列号
-     * @return
-     */
-    private String excelColIndexToStr(int columnIndex) {
-        if (columnIndex <= 0) {
-            return null;
-        }
-        String columnStr = "";
-        columnIndex--;
-        do {
-            if (columnStr.length() > 0) {
-                columnIndex--;
-            }
-            columnStr = ((char) (columnIndex % 26 + (int) 'A')) + columnStr;
-            columnIndex = (int) ((columnIndex - columnIndex % 26) / 26);
-        } while (columnIndex > 0);
-        return columnStr;
+    @RequestMapping("/download")
+    public void export(HttpServletRequest request, HttpServletResponse response){
+        docService.download(request, response);
     }
 
 }

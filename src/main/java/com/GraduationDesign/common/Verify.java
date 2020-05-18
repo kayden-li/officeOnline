@@ -15,6 +15,9 @@ import java.util.Random;
 public class Verify {
     private int VERIFY_CODE_LENGTH = 6;
 
+    public static String MATCH_SYMBOL = "\\(\\[,\\]\\)";
+    public static String SYMBOL = "([,])";
+
     public String verifyCode() {
         String base = "abcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();

@@ -1472,14 +1472,14 @@
 
         //将字母转换为数字
         function stringToNum(a){
-            var str=a.toLowerCase().split("");
-            var al = str.length;
-            var getCharNumber = function(charx){
+            let str=a.toLowerCase().split("");
+            let al = str.length;
+            let getCharNumber = function(charx){
                 return charx.charCodeAt() -96;
             };
-            var numout = 0;
-            var charnum = 0;
-            for(var i = 0; i < al; i++){
+            let numout = 0;
+            let charnum = 0;
+            for(let i = 0; i < al; i++){
                 charnum = getCharNumber(str[i]);
                 numout += charnum * Math.pow(26, al-i-1);
             };
@@ -1588,7 +1588,13 @@
             }
             //设置当前用户颜色
             if(t != null) {
-                t.style['backgroundColor'] = user.color
+                if(null != selectTd) {
+                    if(t != selectTd[0]) {
+                        t.style['backgroundColor'] = user.color
+                    }
+                }else{
+                    t.style['backgroundColor'] = user.color
+                }
             }
             //更新保存的位置
             user.td = t;

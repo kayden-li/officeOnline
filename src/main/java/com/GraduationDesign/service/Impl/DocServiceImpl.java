@@ -1,17 +1,25 @@
 package com.GraduationDesign.service.Impl;
 
 import com.GraduationDesign.common.HigherResponse;
+import com.GraduationDesign.common.SimpleExcel;
 import com.GraduationDesign.common.Verify;
 import com.GraduationDesign.dao.DocDao;
+import com.GraduationDesign.enity.Doc;
 import com.GraduationDesign.enity.Update;
 import com.GraduationDesign.enity.Upload;
 import com.GraduationDesign.service.DocService;
 import com.google.gson.Gson;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +51,7 @@ public class DocServiceImpl implements DocService {
         Integer user = Verify.getUser(request);
         Upload upload = new Gson().fromJson(data, Upload.class);
         //获取文件名+"_"+时间
-        String excelName = upload.getExcelName()+"_"+System.currentTimeMillis();
+        String excelName = upload.getExcelName();
         //设置excel文件名
         upload.setExcelName(excelName);
         //上传文件信息
@@ -170,6 +178,47 @@ public class DocServiceImpl implements DocService {
                 return HigherResponse.getResponseFailed("更新失败");
             }
         }
+        return HigherResponse.getResponseSuccess();
+    }
+
+    public HigherResponse download(HttpServletRequest request, HttpServletResponse response){
+        //验证用户是否登录
+        Integer user = (Integer) request.getSession().getAttribute("user");
+        if(user == null){
+            return HigherResponse.noLogin();
+        }
+        //验证用户是否选择文档
+        Integer doc = (Integer) request.getSession().getAttribute("doc");
+        if(null == doc || doc<=0){
+            return HigherResponse.getResponseFailed("连接出错，请重试");
+        }
+        //设置sheet
+        SimpleExcel excel = new SimpleExcel();
+        List<String> sheets = docDao.getAllSheetsByDoc(doc);
+        excel.setSheets(sheets);
+        //设置update
+        List<Update> updates = new ArrayList<>();
+        for (String sheet : sheets) {
+            updates.addAll(docDao.getUpdate(sheet, doc));
+        }
+        excel.setCells(updates);
+        //设置文件名
+        Doc docs = docDao.find_doc(doc);
+        String[] names = docs.getName().split("\\.");
+        StringBuffer name = new StringBuffer("");
+        for (int i = 0; i < names.length-1; ++i) {
+            name.append(names[i]);
+        }
+        excel.setFileName(name.toString());
+        excel.setType(names[names.length-1]);
+        //设置下载头
+        try {
+            excel.setResponseExportExcelHeader(response);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //向response中写入excel
+        excel.output(response);
         return HigherResponse.getResponseSuccess();
     }
 
