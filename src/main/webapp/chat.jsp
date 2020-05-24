@@ -119,7 +119,8 @@
 
     function changeSheet(ele) {
         //向其他用户发送更改sheet的消息
-        socket.send("sheet([,])" + ele.innerText)
+        //socket.send("sheet([,])" + ele.innerText)
+        socket.close()
         window.location.href = "${pageContext.request.contextPath}/excel/changeSheet?sheetName="+ele.innerText
     }
     //下载按钮

@@ -9,16 +9,12 @@ import com.GraduationDesign.enity.Update;
 import com.GraduationDesign.enity.Upload;
 import com.GraduationDesign.service.DocService;
 import com.google.gson.Gson;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,19 +145,19 @@ public class DocServiceImpl implements DocService {
         return HigherResponse.getResponseSuccess(datas);
     }
 
-    public HigherResponse update(HttpServletRequest request, Update update){
+    public HigherResponse update(HttpServletRequest request, Update update) {
         //验证用户是否登录
         Integer user = (Integer) request.getSession().getAttribute("user");
-        if(user == null){
+        if (user == null) {
             return HigherResponse.noLogin();
         }
         //验证用户是否选择文档
         Integer doc = (Integer) request.getSession().getAttribute("doc");
-        if(null == doc || doc<=0){
+        if (null == doc || doc <= 0) {
             return HigherResponse.getResponseFailed("连接出错，请重试");
         }
         String sheet = (String) request.getSession().getAttribute("Ssheet");
-        if(null == sheet || "".equals(sheet)){
+        if (null == sheet || "".equals(sheet)) {
             return HigherResponse.getResponseFailed("连接出错，请重试");
         }
         //设置用户更新的文档
@@ -171,11 +167,22 @@ public class DocServiceImpl implements DocService {
         //设置用户更新的sheet
         update.setSheet(sheet);
 
+        //是删除数据的操作
+        if (null == update.getText() || "".equals(update.getText())) {
+            if (!docDao.deleteUpdate(update)) {
+                return HigherResponse.getResponseFailed("删除失败");
+            }
+        }
         //若不是添加数据，则更新数据
-        if(!docDao.in_update(update)) {
+        Update isUpdate = docDao.getUpadateByPos(update);
+        if(null != isUpdate) {
             //若插入、更新都不成功，则返回失败
             if (!docDao.update(update)) {
                 return HigherResponse.getResponseFailed("更新失败");
+            }
+        }else{
+            if(!docDao.in_update(update)){
+                return HigherResponse.getResponseFailed("插入失败");
             }
         }
         return HigherResponse.getResponseSuccess();

@@ -1609,6 +1609,7 @@
         }
 
         function updateText(str){
+            console.log(str)
             $.ajax({
                 type:"post",
                 url:pagecontext+"/excel/update",
@@ -1629,11 +1630,12 @@
                         //更新成功后
                         //向其他人发送更新文本的消息
                         socket.send(str)
-                        //发送完毕
-                        thisTd.change = false
                     }
                 }
             })
+
+            //发送完毕
+            thisTd.change = false
         }
 
     }

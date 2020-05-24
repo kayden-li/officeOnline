@@ -32,6 +32,12 @@ public interface DocDao {
     //获取文档内的数据
     List<Update> getUpdate(String sheet, Integer doc);
 
+    //获取某一位置的数据
+    Update getUpadateByPos(Update update);
+
+    //删除某一位置的内容
+    Boolean deleteUpdate(Update update);
+
     //查找文档id有没有对用的文档
     Doc find_doc(Integer doc);
 

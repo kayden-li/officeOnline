@@ -70,7 +70,10 @@ public class FuncController {
         sb.append(datas[0]);
         update.setPosition(sb.toString());
         //设置更新文本
-        update.setText(datas[2]);
+        if(datas.length > 2) {
+            update.setText(datas[2]);
+        }
+
         return docService.update(request, update);
     }
 

@@ -33,6 +33,15 @@
         select * from gd_update where doc=#{1} and sheet=#{0}
     </select>
 
+    <!--根据位置查找内容-->
+    <select id="getUpadateByPos" resultType="update">
+        select * from gd_update where doc=#{doc} and sheet=#{sheet} and position=#{position}
+    </select>
+
+    <delete id="deleteUpdate">
+        delete from gd_update where doc=#{doc} and sheet=#{sheet} and position=#{position}
+    </delete>
+
     <!--根据docID查找文档-->
     <select id="find_doc" resultType="Doc" parameterType="Integer">
       SELECT * FROM gd_doc WHERE id = #{doc}
@@ -47,8 +56,8 @@
 
     <!--更新文件的内容-->
     <update id="update" parameterType="update">
-      update gd_update set text=#{update},user=#{user},updateTime=now()
-      where doc=#{doc} and position=#{position}
+      update gd_update set text=#{text},user=#{user},updateTime=now()
+      where doc=#{doc} and sheet=#{sheet} and position=#{position}
     </update>
 
 </mapper>
