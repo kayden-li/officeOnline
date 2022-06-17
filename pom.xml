@@ -157,7 +157,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.47</version>
+                <version>1.2.83</version>
             </dependency>
             <!-- 基本依赖，仅操作 xls 格式只需引入此依赖 -->
             <dependency>
